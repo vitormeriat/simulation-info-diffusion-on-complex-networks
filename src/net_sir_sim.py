@@ -46,7 +46,7 @@ class DataBase():
         item = coll.find_one(
             {"simulation_name": sim_name}, {'_id'})
         self.conn.close()
-        return False if item == None else True
+        return item is not None
 
     def insert_summary(self, summary):
         self.connect_db()
@@ -130,7 +130,7 @@ class Simulation():
         start_time_global = time()
         self.graph.simulation_name = self.simulation_name
 
-        for i in range(0, self.num_simulations):
+        for i in range(self.num_simulations):
             start_time = time()
 
             print(f'\n{"═"*100}\nIniciando simulação \
@@ -152,7 +152,7 @@ class Simulation():
         elapsed = end_time_global - start_time_global
 
         print(f'\n{"█"*100}\n\n')
-        print(f'Finalizando a simulação e gravando a sumarização...')
+        print('Finalizando a simulação e gravando a sumarização...')
 
         #print("\n%40s    %s" % ('General Process', 'Time'))
         #print("%40s    %s" % ('='*40, '='*25))
@@ -208,7 +208,7 @@ class Stats(Base):
     def average_degree(self, G):
         self.start_time = time()
         G_deg = nx.degree_histogram(G)
-        G_deg_sum = [a * b for a, b in zip(G_deg, range(0, len(G_deg)))]
+        G_deg_sum = [a * b for a, b in zip(G_deg, range(len(G_deg)))]
         average_degree = round(
             sum(G_deg_sum) / G.number_of_nodes(), self.round_len)
         self.log_with_time('Average Degree', False)
@@ -226,9 +226,7 @@ class Stats(Base):
     def closeness_centrality(self, G, _is):
         # Run closeness centrality
         self.start_time = time()
-        closeness_dict = {}
-        for g in _is:
-            closeness_dict[g] = nx.closeness_centrality(G, u=g)
+        closeness_dict = {g: nx.closeness_centrality(G, u=g) for g in _is}
         self.log_with_time('Closeness centrality', False)
         return closeness_dict
 
@@ -318,10 +316,10 @@ class Graph(Base):
         self.print_configuration_result()
 
     def create_net_erdos_renyi(self, nodes, probability):
-        self.netowrk_model = 'erdos_renyi_gnp'        
+        self.netowrk_model = 'erdos_renyi_gnp'
         G = nx.gnp_random_graph(nodes, probability)
         isolates = list(nx.isolates(G))
-        if len(isolates) > 0:
+        if isolates:
             return G.remove_nodes_from(list(nx.isolates(G)))
         else:
             return G
@@ -330,7 +328,7 @@ class Graph(Base):
         self.netowrk_model = 'barabasi_albert'
         G = nx.barabasi_albert_graph(nodes, edges)
         isolates = list(nx.isolates(G))
-        if len(isolates) > 0:
+        if isolates:
             return G.remove_nodes_from(list(nx.isolates(G)))
         else:
             return G
@@ -339,7 +337,7 @@ class Graph(Base):
         self.netowrk_model = 'watts_strogatz'
         G = nx.watts_strogatz_graph(nodes, edges, probability)
         isolates = list(nx.isolates(G))
-        if len(isolates) > 0:
+        if isolates:
             return G.remove_nodes_from(list(nx.isolates(G)))
         else:
             return G
@@ -390,15 +388,10 @@ class Graph(Base):
 
         w = [random.random() for i in range(self.G.number_of_edges())]
         s = max(w)
-        k = 0
         w = [i/s for i in w]
-        for i, j in self.G.edges():
+        for k, (i, j) in enumerate(self.G.edges()):
             self.G[i][j]['weight'] = w[k]
-            k += 1
-
-        labels = {}
-        for i in list(self.G.nodes):
-            labels[i] = i
+        labels = {i: i for i in list(self.G.nodes)}
         #labels = [dict({i, i}) for i in list(self.G.nodes)]
 
         edgewidth = [d['weight'] for (u, v, d) in self.G.edges(data=True)]
@@ -462,17 +455,14 @@ class Graph(Base):
         })
 
     def run_stats(self, betweenness, closeness, degree, eigenvector, clustering, _is):
-        stats = []
-        for i in _is:
-            stats.append({
+        return [{
                 'node': i,
                 'degree_centrality': round(degree[i], self.round_len),
                 'closeness_centrality': round(closeness[i], self.round_len),
                 'betweenness_centrality': round(betweenness[i], self.round_len),
                 'eigenvector_centrality': round(eigenvector[i], self.round_len),
                 'clustering_coefficient': round(clustering[i], self.round_len),
-            })
-        return stats
+            } for i in _is]
 
     def statistics(self, sim):
 
@@ -498,7 +488,7 @@ class Graph(Base):
                 clustering_dict = self.stats.clustering_coefficient(self.G)
 
             if self.is_real_network == True:
-                if self.calculated_statistics == None:
+                if self.calculated_statistics is None:
                     self.calculated_statistics = self.run_stats(
                         betweenness_dict, closeness_dict, degree_dict, eigenvector_dict, clustering_dict, _is)
                     stats = self.calculated_statistics
@@ -542,9 +532,7 @@ class Graph(Base):
         try:
             self.start_time = time()
             status = sim.get_statuses(time=self.tmax)
-            last_iteration = {}
-            for i in range(self.G.number_of_nodes()):
-                last_iteration[i] = status[i]
+            last_iteration = {i: status[i] for i in range(self.G.number_of_nodes())}
             self.log_with_time('Obtém as informações da última iteração', False)
 
             self.start_time = time()
@@ -569,7 +557,7 @@ class Graph(Base):
 
                 self.G.nodes[node]['viz']['position'] = {
                     'x': pos[node][0], 'y': pos[node][1], 'z': 5}
-            
+
             nx.write_gexf(self.G, f'{self.path}/network.gexf')
             self.log_with_time('Successfully generated GEXF file', False)
         except:
@@ -609,7 +597,7 @@ class Graph(Base):
                             tmax=self.tmax)
         elif self.simulation_type == 'complex_contagion':
             IC = defaultdict(lambda: 'S')
-            for node in range(2):
+            for _ in range(2):
                 IC[random.choice(list(self.G.nodes))] = 'I'
 
             sim = EoN.Gillespie_complex_contagion(
