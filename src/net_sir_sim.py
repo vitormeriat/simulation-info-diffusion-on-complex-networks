@@ -12,21 +12,14 @@ import matplotlib.pyplot as plt
 from pymongo import MongoClient
 from collections import defaultdict
 
-base_path = 'simulation_result' if platform.system() == 'Linux' else 'C:/simulation_result'
+base_path = 'simulation_result' if platform.system(
+) == 'Linux' else 'C:/simulation_result'
+
 
 @enum.unique
 class ProcessStatus(enum.IntEnum):
-    success = 0     # Indicates successful program completion.    
+    success = 0     # Indicates successful program completion.
     failure = 101   # Indicates unsuccessful program completion in a general sense
-    metada_without_audio = 102   
-    audio_without_info = 103
-    audio_not_eligible = 104
-    transcription_failure = 105
-    transcriber_failure = 106 
-    metadata_missing = 107
-    audio_not_converted_to_mp3 = 108
-    insert_item_sql_segmentos_error = 109
-    exectue_proc_sql_criasegmentos_erro = 110
 
 
 class DataBase():
@@ -300,10 +293,12 @@ class Graph(Base):
             {'metric': 'Density', 'result': self.density},
             {'metric': 'Diameter', 'result': self.diameter},
             {'metric': 'Radius', 'result': self.radius},
-            {'metric': 'Average Shortest_path', 'result': self.average_shortest_path},
+            {'metric': 'Average Shortest_path',
+                'result': self.average_shortest_path},
             {'metric': 'Average Degree', 'result': self.average_degree},
             {'metric': 'This Graph is connected?', 'result': is_connected},
-            {'metric': 'Number of different connected components', 'result': number_connected_components}
+            {'metric': 'Number of different connected components',
+                'result': number_connected_components}
         ]
         print(f'\n{tabulate(table, headers="keys", tablefmt="github")}')
 
@@ -317,73 +312,73 @@ class Graph(Base):
 
         self.print_configuration_result()
 
-    def create_net_erdos_renyi(self, nodes, probability):
-        self.netowrk_model = 'erdos_renyi_gnp'        
-        G = nx.gnp_random_graph(nodes, probability)
-        isolates = list(nx.isolates(G))
-        if len(isolates) > 0:
-            return G.remove_nodes_from(list(nx.isolates(G)))
-        else:
-            return G
+    # def create_net_erdos_renyi(self, nodes, probability):
+    #     self.netowrk_model = 'erdos_renyi_gnp'
+    #     G = nx.gnp_random_graph(nodes, probability)
+    #     isolates = list(nx.isolates(G))
+    #     if len(isolates) > 0:
+    #         return G.remove_nodes_from(list(nx.isolates(G)))
+    #     else:
+    #         return G
 
-    def create_net_barabasi_albert(self, nodes, edges):
-        self.netowrk_model = 'barabasi_albert'
-        G = nx.barabasi_albert_graph(nodes, edges)
-        isolates = list(nx.isolates(G))
-        if len(isolates) > 0:
-            return G.remove_nodes_from(list(nx.isolates(G)))
-        else:
-            return G
+    # def create_net_barabasi_albert(self, nodes, edges):
+    #     self.netowrk_model = 'barabasi_albert'
+    #     G = nx.barabasi_albert_graph(nodes, edges)
+    #     isolates = list(nx.isolates(G))
+    #     if len(isolates) > 0:
+    #         return G.remove_nodes_from(list(nx.isolates(G)))
+    #     else:
+    #         return G
 
-    def create_net_watts_strogatz(self, nodes, edges, probability):
-        self.netowrk_model = 'watts_strogatz'
-        G = nx.watts_strogatz_graph(nodes, edges, probability)
-        isolates = list(nx.isolates(G))
-        if len(isolates) > 0:
-            return G.remove_nodes_from(list(nx.isolates(G)))
-        else:
-            return G
+    # def create_net_watts_strogatz(self, nodes, edges, probability):
+    #     self.netowrk_model = 'watts_strogatz'
+    #     G = nx.watts_strogatz_graph(nodes, edges, probability)
+    #     isolates = list(nx.isolates(G))
+    #     if len(isolates) > 0:
+    #         return G.remove_nodes_from(list(nx.isolates(G)))
+    #     else:
+    #         return G
 
-    def create_net_facebook(self, model_id):
-        self.is_real_network = True
-        #self.netowrk_model = f'facebook-{model_id}'
-        #["Ego", "Bowdoin47", "Haverford76", "Simmons81"] 
-        if model_id == 'Ego':
-            self.netowrk_model = 'snap-Ego'
-            #return nx.read_edgelist("../data/facebook_combined.txt.gz", create_using=nx.Graph(), nodetype=int)
-            return nx.read_gexf("../data/facebook_combined.gexf")
-        elif model_id == 'Bowdoin47':
-            self.netowrk_model = 'socfb-Bowdoin47'
-            #return nx.read_adjlist("../data/socfb-Bowdoin47.mtx", create_using=nx.DiGraph(), nodetype=int)
-            return nx.read_gexf("../data/socfb-Bowdoin47.gexf")
-        elif model_id == 'Haverford76':
-            self.netowrk_model = 'socfb-Haverford76'
-            #return nx.read_adjlist("../data/socfb-Haverford76.mtx", create_using=nx.DiGraph(), nodetype=int)
-            return nx.read_gexf("../data/socfb-Haverford76.gexf")
-        elif model_id == 'Simmons81':
-            self.netowrk_model = 'socfb-Simmons81'
-            #return nx.read_adjlist("../data/socfb-Simmons81.mtx", create_using=nx.DiGraph(), nodetype=int) 
-            return nx.read_gexf("../data/socfb-Simmons81.gexf")
-        elif model_id == 'Facebook01':
-            self.netowrk_model = 'fb-01'
-            return nx.read_gexf('../data/fb1.gexf')
-        elif model_id == 'Facebook02':
-            self.netowrk_model = 'fb-02'
-            return nx.read_gexf('../data/fb2.gexf') 
-        elif model_id == 'Facebook03':
-            self.netowrk_model = 'fb-03'
-            return nx.read_gexf('../data/fb3.gexf') 
-        elif model_id == 'Facebook04':
-            self.netowrk_model = 'fb-04'
-            return nx.read_gexf('../data/fb4.gexf')        
-        else:
-            None
+    # def create_net_facebook(self, model_id):
+    #     self.is_real_network = True
+    #     #self.netowrk_model = f'facebook-{model_id}'
+    #     #["Ego", "Bowdoin47", "Haverford76", "Simmons81"]
+    #     if model_id == 'Ego':
+    #         self.netowrk_model = 'snap-Ego'
+    #         # return nx.read_edgelist("../data/facebook_combined.txt.gz", create_using=nx.Graph(), nodetype=int)
+    #         return nx.read_gexf("../data/facebook_combined.gexf")
+    #     elif model_id == 'Bowdoin47':
+    #         self.netowrk_model = 'socfb-Bowdoin47'
+    #         # return nx.read_adjlist("../data/socfb-Bowdoin47.mtx", create_using=nx.DiGraph(), nodetype=int)
+    #         return nx.read_gexf("../data/socfb-Bowdoin47.gexf")
+    #     elif model_id == 'Haverford76':
+    #         self.netowrk_model = 'socfb-Haverford76'
+    #         # return nx.read_adjlist("../data/socfb-Haverford76.mtx", create_using=nx.DiGraph(), nodetype=int)
+    #         return nx.read_gexf("../data/socfb-Haverford76.gexf")
+    #     elif model_id == 'Simmons81':
+    #         self.netowrk_model = 'socfb-Simmons81'
+    #         # return nx.read_adjlist("../data/socfb-Simmons81.mtx", create_using=nx.DiGraph(), nodetype=int)
+    #         return nx.read_gexf("../data/socfb-Simmons81.gexf")
+    #     elif model_id == 'Facebook01':
+    #         self.netowrk_model = 'fb-01'
+    #         return nx.read_gexf('../data/fb1.gexf')
+    #     elif model_id == 'Facebook02':
+    #         self.netowrk_model = 'fb-02'
+    #         return nx.read_gexf('../data/fb2.gexf')
+    #     elif model_id == 'Facebook03':
+    #         self.netowrk_model = 'fb-03'
+    #         return nx.read_gexf('../data/fb3.gexf')
+    #     elif model_id == 'Facebook04':
+    #         self.netowrk_model = 'fb-04'
+    #         return nx.read_gexf('../data/fb4.gexf')
+    #     else:
+    #         None
 
-    def create_net_twitter(self):
-        self.is_real_network = True
-        self.netowrk_model = 'twitter'
-        
-        return nx.read_edgelist("../data/twitter_combined.txt.gz", create_using=nx.Graph(), nodetype=int)
+    # def create_net_twitter(self):
+    #     self.is_real_network = True
+    #     self.netowrk_model = 'twitter'
+
+    #     return nx.read_edgelist("../data/twitter_combined.txt.gz", create_using=nx.Graph(), nodetype=int)
 
     def edges_configuration(self):
         self.log_with_time('Iniciando configuração dos nós')
@@ -545,7 +540,8 @@ class Graph(Base):
             last_iteration = {}
             for i in range(self.G.number_of_nodes()):
                 last_iteration[i] = status[i]
-            self.log_with_time('Obtém as informações da última iteração', False)
+            self.log_with_time(
+                'Obtém as informações da última iteração', False)
 
             self.start_time = time()
 
@@ -569,14 +565,14 @@ class Graph(Base):
 
                 self.G.nodes[node]['viz']['position'] = {
                     'x': pos[node][0], 'y': pos[node][1], 'z': 5}
-            
+
             nx.write_gexf(self.G, f'{self.path}/network.gexf')
             self.log_with_time('Successfully generated GEXF file', False)
         except:
             pass
 
     def rate_function(self, G, node, status, parameters):
-        tau,gamma = parameters
+        tau, gamma = parameters
         if status[node] == 'I':
             return gamma
         elif status[node] == 'S':
@@ -596,30 +592,30 @@ class Graph(Base):
     def simulation_in_graph(self):
         print('Iniciando simulação EoN')
 
-        sim=None
+        sim = None
 
         if self.simulation_type == 'fast_sir':
             #R_0 = self.I_0/self.population
             sim = EoN.fast_SIR(self.G,
-                            tau=self.beta,
-                            gamma=self.gamma,
-                            rho=self.R_0,
-                            # transmission_weight="weight",
-                            return_full_data=True,
-                            tmax=self.tmax)
+                               tau=self.beta,
+                               gamma=self.gamma,
+                               rho=self.R_0,
+                               # transmission_weight="weight",
+                               return_full_data=True,
+                               tmax=self.tmax)
         elif self.simulation_type == 'complex_contagion':
             IC = defaultdict(lambda: 'S')
             for node in range(2):
                 IC[random.choice(list(self.G.nodes))] = 'I'
 
             sim = EoN.Gillespie_complex_contagion(
-                self.G, 
+                self.G,
                 self.rate_function,
-                self.transition_choice, 
-                self.get_influence_set, 
+                self.transition_choice,
+                self.get_influence_set,
                 IC,
                 return_statuses=('S', 'I', 'R'),
-                parameters=(self.beta, self.gamma), 
+                parameters=(self.beta, self.gamma),
                 return_full_data=True,
                 tmax=self.tmax)
 
@@ -635,3 +631,71 @@ class Graph(Base):
 
         self.statistics(sim)
         self.generate_gexf(sim)
+
+
+class GraphGenerator():
+
+    def create_net_erdos_renyi(self, nodes, probability):
+        self.netowrk_model = 'erdos_renyi_gnp'
+        G = nx.gnp_random_graph(nodes, probability)
+        isolates = list(nx.isolates(G))
+        if len(isolates) > 0:
+            return G.remove_nodes_from(list(nx.isolates(G)))
+        else:
+            return G
+
+    def create_net_barabasi_albert(self, nodes, edges):
+        self.netowrk_model = 'barabasi_albert'
+        G = nx.barabasi_albert_graph(nodes, edges)
+        isolates = list(nx.isolates(G))
+        if len(isolates) > 0:
+            return G.remove_nodes_from(list(nx.isolates(G)))
+        else:
+            return G
+
+    def create_net_watts_strogatz(self, nodes, edges, probability):
+        self.netowrk_model = 'watts_strogatz'
+        G = nx.watts_strogatz_graph(nodes, edges, probability)
+        isolates = list(nx.isolates(G))
+        if len(isolates) > 0:
+            return G.remove_nodes_from(list(nx.isolates(G)))
+        else:
+            return G
+
+    def create_net_facebook(self, model_id):
+        self.is_real_network = True
+        if model_id == 'Ego':
+            self.netowrk_model = 'snap-Ego'
+            # return nx.read_edgelist("../data/facebook_combined.txt.gz", create_using=nx.Graph(), nodetype=int)
+            return nx.read_gexf("../data/facebook_combined.gexf")
+        elif model_id == 'Bowdoin47':
+            self.netowrk_model = 'socfb-Bowdoin47'
+            # return nx.read_adjlist("../data/socfb-Bowdoin47.mtx", create_using=nx.DiGraph(), nodetype=int)
+            return nx.read_gexf("../data/socfb-Bowdoin47.gexf")
+        elif model_id == 'Haverford76':
+            self.netowrk_model = 'socfb-Haverford76'
+            # return nx.read_adjlist("../data/socfb-Haverford76.mtx", create_using=nx.DiGraph(), nodetype=int)
+            return nx.read_gexf("../data/socfb-Haverford76.gexf")
+        elif model_id == 'Simmons81':
+            self.netowrk_model = 'socfb-Simmons81'
+            # return nx.read_adjlist("../data/socfb-Simmons81.mtx", create_using=nx.DiGraph(), nodetype=int)
+            return nx.read_gexf("../data/socfb-Simmons81.gexf")
+        elif model_id == 'Facebook01':
+            self.netowrk_model = 'fb-01'
+            return nx.read_gexf('../data/fb1.gexf')
+        elif model_id == 'Facebook02':
+            self.netowrk_model = 'fb-02'
+            return nx.read_gexf('../data/fb2.gexf')
+        elif model_id == 'Facebook03':
+            self.netowrk_model = 'fb-03'
+            return nx.read_gexf('../data/fb3.gexf')
+        elif model_id == 'Facebook04':
+            self.netowrk_model = 'fb-04'
+            return nx.read_gexf('../data/fb4.gexf')
+        else:
+            None
+
+    def create_net_twitter(self):
+        self.is_real_network = True
+        self.netowrk_model = 'twitter'
+        return nx.read_edgelist("../data/twitter_combined.txt.gz", create_using=nx.Graph(), nodetype=int)

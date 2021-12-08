@@ -1,26 +1,29 @@
 import net_sir_sim as sim
 import enum
 
+
 class EnumResult():
     def get(self, msg):
         return msg.value
 
+
 @enum.unique
 class BaseModel(enum.Enum):
-    EGO='Ego'
-    BOWDOIN='Bowdoin47'
-    HAVERFORD='Haverford76'
-    SIMMONS='Simmons81'
-    FB01='Facebook01'
-    FB02='Facebook02'
-    FB03='Facebook03'
-    FB04='Facebook04'
-    TWITTER='Twitter'
+    EGO = 'Ego'
+    BOWDOIN = 'Bowdoin47'
+    HAVERFORD = 'Haverford76'
+    SIMMONS = 'Simmons81'
+    FB01 = 'Facebook01'
+    FB02 = 'Facebook02'
+    FB03 = 'Facebook03'
+    FB04 = 'Facebook04'
+    TWITTER = 'Twitter'
+
 
 @enum.unique
 class SimulationType(enum.Enum):
-    FAST_SIR='fast_sir'
-    COMPLEX_CONTAGION='complex_contagion'
+    FAST_SIR = 'fast_sir'
+    COMPLEX_CONTAGION = 'complex_contagion'
 
 
 def simule(gamma, beta, R_0, tmax, simulation_name, num_simulations, model, base_model, param, simulation_type):
@@ -54,7 +57,8 @@ def generate_sim(base_model, gamma, beta, R_0, tmax, simulation_name, num_simula
     base = sim.Base()
 
     if base.query_yes_no("\nDeseja prosseguir na simulação?", None):
-        ntwrks = ["Ego", "Bowdoin47", "Haverford76", "Simmons81", "Facebook01", "Facebook02", "Facebook03", "Facebook04", "Twitter"]
+        ntwrks = ["Ego", "Bowdoin47", "Haverford76", "Simmons81",
+                  "Facebook01", "Facebook02", "Facebook03", "Facebook04", "Twitter"]
         parametrs = [
             {
                 'model': 'Ego',
@@ -118,16 +122,21 @@ def generate_sim(base_model, gamma, beta, R_0, tmax, simulation_name, num_simula
         simulation_name = f'{simulation_name}-{base_model}'
 
         if base_model == 'Twitter':
-            simule(gamma, beta, R_0, tmax, f'{simulation_name}-twitter', num_simulations, 'twitter', base_model, param, simulation_type)
+            simule(gamma, beta, R_0, tmax, f'{simulation_name}-twitter',
+                   num_simulations, 'twitter', base_model, param, simulation_type)
         else:
-            simule(gamma, beta, R_0, tmax, f'{simulation_name}-facebook', num_simulations, 'facebook', base_model, param, simulation_type)
+            simule(gamma, beta, R_0, tmax, f'{simulation_name}-facebook',
+                   num_simulations, 'facebook', base_model, param, simulation_type)
 
         #simule(gamma, beta, R_0, tmax, f'{simulation_name}-facebook', num_simulations, 'facebook', base_model, param, simulation_type)
 
-        simule(gamma, beta, R_0, tmax, f'{simulation_name}-watts_strogatz', num_simulations, 'watts_strogatz', base_model, param, simulation_type)
+        simule(gamma, beta, R_0, tmax, f'{simulation_name}-watts_strogatz',
+               num_simulations, 'watts_strogatz', base_model, param, simulation_type)
 
-        simule(gamma, beta, R_0, tmax, f'{simulation_name}-barabasi_albert', num_simulations, 'barabasi_albert', base_model, param, simulation_type)
+        simule(gamma, beta, R_0, tmax, f'{simulation_name}-barabasi_albert',
+               num_simulations, 'barabasi_albert', base_model, param, simulation_type)
 
-        simule(gamma, beta, R_0, tmax, f'{simulation_name}-erdos_renyi', num_simulations, 'erdos_renyi', base_model, param, simulation_type)
+        simule(gamma, beta, R_0, tmax, f'{simulation_name}-erdos_renyi',
+               num_simulations, 'erdos_renyi', base_model, param, simulation_type)
     else:
         print('Simulação abortada!!!')
